@@ -1,0 +1,12 @@
+web:
+  build: .
+  ports:
+   - "3000:3000"
+  links:
+   - db
+db:
+  image: postgres
+  environment:
+    - POSTGRES_PASSWORD=btrack
+    - POSTGRES_USER=btrack
+    - POSTGRES_DB=btrack
