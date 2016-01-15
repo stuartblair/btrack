@@ -1,6 +1,7 @@
 # btrack
 
-FIXME
+## Build Status
+[![Circle CI](https://circleci.com/gh/stuartblair/btrack.svg?style=svg)](https://circleci.com/gh/stuartblair/btrack)
 
 ## Prerequisites
 
