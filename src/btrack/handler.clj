@@ -1,23 +1,28 @@
 (ns btrack.handler
-  (:require [compojure.core :refer :all]
-            [compojure.route :as route]
-            ;[compojure.handler :as handler]
-            [ring.util.response :refer [response]]
-            [ring.middleware.json :refer [wrap-json-response wrap-json-body]]
-            [ring.middleware.defaults :refer [wrap-defaults site-defaults]]))
+  (:require [clojure.tools.logging :as log]
+
+            [ring.util.response :as response]
+            [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
+            [compojure.core :refer :all]
+            [compojure.route :as route]))
 
 (defroutes app-routes
-           (route/not-found
-             (response {:message "Page not found"})))
+           (GET  "/" [] "Hello there!")
+           (GET  "/users" [] "All the users right here!")
+           (route/not-found {:status 404 :body "Not Found"}))
 
-(defn wrap-log-request [handler]
-  (fn [req]
-    (println req)
-    (handler req)))
 
 (def app
-  (-> app-routes
-      wrap-log-request
-      wrap-json-response
-      wrap-json-body))
+  ;; Disable anti-forgery as it interferes with Connect POSTs
+  (let [connect-defaults (-> site-defaults
+                             (assoc-in [:security :anti-forgery] false)
+                             (assoc-in [:security :frame-options] false)) ]
 
+    (-> app-routes
+        (wrap-defaults connect-defaults))))
+
+(defn init []
+  (log/info "Initialising application"))
+
+(defn shutdown []
+  (log/info "Shutting down application"))

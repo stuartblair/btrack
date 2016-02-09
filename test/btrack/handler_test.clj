@@ -6,13 +6,11 @@
 (deftest test-app
   (testing "main route"
     (let [response (app (mock/request :get "/"))]
-      (is (= (:status response) 200))
-      (is (= (get-in response [:headers "Content-Type"]) "application-json"))))
+      (is (= (:status response) 200))))
 
   (testing "users"
-    (let [response (app (mock/request :post "/users"))]
-      (is (= (:status response) 200))
-      (is (= (get-in response [:headers "Content-Type"]) "application-json"))))
+    (let [response (app (mock/request :get "/users"))]
+      (is (= (:status response) 200))))
 
   (testing "not-found route"
     (let [response (app (mock/request :get "/invalid"))]
