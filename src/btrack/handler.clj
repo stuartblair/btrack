@@ -1,10 +1,11 @@
 (ns btrack.handler
   (:require [clojure.tools.logging :as log]
 
-            [ring.util.response :as response]
+            [ring.util.response :refer [response]]
             [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
             [compojure.core :refer :all]
-            [compojure.route :as route]))
+            [compojure.route :as route]
+            [buddy.auth :refer [authenticated?]]))
 
 (defroutes app-routes
            (GET  "/" [] "Hello there!")
@@ -26,3 +27,9 @@
 
 (defn shutdown []
   (log/info "Shutting down application"))
+
+(defn my-sample-handler
+  [request]
+  (if (authenticated? request)
+    (response (format "Hello %s" (:identity request)))
+    (response ("Hello anonymous user"))))
