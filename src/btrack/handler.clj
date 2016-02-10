@@ -2,25 +2,14 @@
   (:require [clojure.tools.logging :as log]
 
             [ring.util.response :refer [response]]
-            [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
             [compojure.core :refer :all]
             [compojure.route :as route]
-            [buddy.auth :refer [authenticated?]]))
+            [buddy.auth :refer [authenticated? throw-unauthorized]]
+            [buddy.auth.backends.httpbasic :refer [http-basic-backend]]
+            [buddy.auth.middleware :refer [wrap-authentication wrap-authorization]]))
 
-(defroutes app-routes
-           (GET  "/" [] "Hello there!")
-           (GET  "/users" [] "All the users right here!")
-           (route/not-found {:status 404 :body "Not Found"}))
-
-
-(def app
-  ;; Disable anti-forgery as it interferes with Connect POSTs
-  (let [connect-defaults (-> site-defaults
-                             (assoc-in [:security :anti-forgery] false)
-                             (assoc-in [:security :frame-options] false)) ]
-
-    (-> app-routes
-        (wrap-defaults connect-defaults))))
+(def authdata {:admin "secret"
+               :test "secret"})
 
 (defn init []
   (log/info "Initialising application"))
@@ -28,8 +17,27 @@
 (defn shutdown []
   (log/info "Shutting down application"))
 
-(defn my-sample-handler
+(defn handle-users
   [request]
-  (if (authenticated? request)
-    (response (format "Hello %s" (:identity request)))
-    (response ("Hello anonymous user"))))
+  (if-not (authenticated? request)
+    (throw-unauthorized)
+    (response (format "Hello %s" (:identity request)))))
+
+(defn my-authfn
+  [req {:keys [username password]}]
+  (when-let [user-password (get authdata (keyword username))]
+    (when (= password user-password)
+      (keyword username))))
+
+(def backend (http-basic-backend {:realm "MyApi" :authfn my-authfn}))
+
+(defroutes app-routes
+           (GET  "/" [] "Hello there!")
+           (GET  "/users" [] handle-users)
+           (route/not-found {:status 404 :body "Not Found"}))
+
+(def app
+  (-> app-routes
+      (wrap-authentication backend)
+      (wrap-authorization backend)))
+
