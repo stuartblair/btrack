@@ -1,12 +1,8 @@
 (ns btrack.core
   (:gen-class)
   (:require [clojure.tools.logging :as log]
-
             [btrack.handler :refer [app init shutdown]]
-
             [immutant.web :as web]
-            [immutant.web.middleware :refer [wrap-development]]
-
             [environ.core :refer [env]]))
 
 
@@ -15,7 +11,7 @@
 
 (defn start-server [port]
   (init)
-  (reset! server (web/run (wrap-development app) :port port)))
+  (reset! server (web/run app :port port)))
 
 (defn stop-server []
   (when @server
