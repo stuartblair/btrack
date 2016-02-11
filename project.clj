@@ -19,4 +19,7 @@
             [com.jakemccrary/lein-test-refresh "0.12.0"]]
   :main ^:skip-aot btrack.core
   :target-path "target/%s"
-  :profiles {:uberjar {:aot :all}})
+  :profiles {:uberjar {:aot :all}
+             :test {:dependencies [[pjstadig/humane-test-output "0.7.1"]]
+                    :injections   [(require 'pjstadig.humane-test-output)
+                                   (pjstadig.humane-test-output/activate!)]}})

@@ -6,12 +6,8 @@
 (deftest test-app
   (testing "main route"
     (let [response (app (mock/request :get "/"))]
-      (is (= (:status response) 200))))
+      (is (= 401 (:status response)))))
 
-  (testing "users"
-    (let [response (app (mock/request :get "/users"))]
-      (is (= (:status response) 200))))
-
-  (testing "not-found route"
-    (let [response (app (mock/request :get "/invalid"))]
-      (is (= (:status response) 404)))))
+  (testing "login"
+    (let [response (app (mock/request :post "/login" {}))]
+      (is (= 400 (:status response))))))
